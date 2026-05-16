@@ -1,0 +1,428 @@
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Controle de Estoque</title>
+
+  <style>
+
+    *{
+      margin:0;
+      padding:0;
+      box-sizing:border-box;
+      font-family:Arial, Helvetica, sans-serif;
+    }
+
+    body{
+      background:#f1f5f9;
+    }
+
+    .topo{
+      background:#0f172a;
+      color:white;
+      padding:20px;
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+    }
+
+    .topo h1{
+      font-size:26px;
+    }
+
+    .btn-voltar{
+      background:#ef4444;
+      color:white;
+      border:none;
+      padding:10px 18px;
+      border-radius:8px;
+      cursor:pointer;
+      font-weight:bold;
+    }
+
+    .btn-voltar:hover{
+      background:#dc2626;
+    }
+
+    .container{
+      width:95%;
+      margin:30px auto;
+    }
+
+    .card{
+      background:white;
+      padding:25px;
+      border-radius:15px;
+      box-shadow:0 4px 15px rgba(0,0,0,0.1);
+      margin-bottom:25px;
+    }
+
+    .card h2{
+      margin-bottom:20px;
+      color:#0f172a;
+    }
+
+    .grid{
+      display:grid;
+      grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+      gap:15px;
+    }
+
+    input, select{
+      width:100%;
+      padding:12px;
+      border:1px solid #cbd5e1;
+      border-radius:8px;
+      font-size:15px;
+    }
+
+    input:focus, select:focus{
+      outline:none;
+      border-color:#2563eb;
+    }
+
+    .acoes{
+      margin-top:20px;
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+
+    .btn{
+      border:none;
+      padding:12px 18px;
+      border-radius:8px;
+      cursor:pointer;
+      font-weight:bold;
+      color:white;
+    }
+
+    .btn-salvar{
+      background:#16a34a;
+    }
+
+    .btn-salvar:hover{
+      background:#15803d;
+    }
+
+    .btn-limpar{
+      background:#64748b;
+    }
+
+    .btn-limpar:hover{
+      background:#475569;
+    }
+
+    .pesquisa{
+      margin-bottom:20px;
+    }
+
+    table{
+      width:100%;
+      border-collapse:collapse;
+      background:white;
+    }
+
+    th{
+      background:#0f172a;
+      color:white;
+      padding:14px;
+      text-align:left;
+    }
+
+    td{
+      padding:12px;
+      border-bottom:1px solid #e2e8f0;
+    }
+
+    tr:hover{
+      background:#f8fafc;
+    }
+
+    .estoque-baixo{
+      color:#dc2626;
+      font-weight:bold;
+    }
+
+    .btn-editar{
+      background:#2563eb;
+      padding:8px 12px;
+      border:none;
+      color:white;
+      border-radius:6px;
+      cursor:pointer;
+    }
+
+    .btn-excluir{
+      background:#dc2626;
+      padding:8px 12px;
+      border:none;
+      color:white;
+      border-radius:6px;
+      cursor:pointer;
+    }
+
+    @media(max-width:768px){
+
+      table{
+        display:block;
+        overflow-x:auto;
+      }
+
+      .topo{
+        flex-direction:column;
+        gap:15px;
+      }
+
+    }
+
+  </style>
+</head>
+<body>
+
+  <div class="topo">
+    <h1>Controle de Estoque - Frota</h1>
+
+    <button class="btn-voltar" onclick="voltarDashboard()">
+      Voltar
+    </button>
+  </div>
+
+  <div class="container">
+
+    <div class="card">
+
+      <h2>Cadastro de Peças</h2>
+
+      <div class="grid">
+
+        <input type="text" id="codigo" placeholder="Código da peça">
+
+        <input type="text" id="peca" placeholder="Nome da peça">
+
+        <select id="categoria">
+          <option value="">Categoria</option>
+          <option>Pneus</option>
+          <option>Motor</option>
+          <option>Freios</option>
+          <option>Suspensão</option>
+          <option>Elétrica</option>
+          <option>Filtros</option>
+        </select>
+
+        <input type="number" id="quantidade" placeholder="Quantidade">
+
+        <input type="number" id="minimo" placeholder="Estoque mínimo">
+
+        <input type="number" id="valor" placeholder="Valor unitário">
+
+        <input type="text" id="fornecedor" placeholder="Fornecedor">
+
+      </div>
+
+      <div class="acoes">
+
+        <button class="btn btn-salvar" onclick="salvarPeca()">
+          Salvar Peça
+        </button>
+
+        <button class="btn btn-limpar" onclick="limparCampos()">
+          Limpar
+        </button>
+
+      </div>
+
+    </div>
+
+    <div class="card">
+
+      <h2>Pesquisar Peça</h2>
+
+      <div class="pesquisa">
+        <input type="text" id="pesquisa" placeholder="Pesquisar peça..." onkeyup="pesquisarPeca()">
+      </div>
+
+      <table id="tabelaEstoque">
+
+        <thead>
+          <tr>
+            <th>Código</th>
+            <th>Peça</th>
+            <th>Categoria</th>
+            <th>Quantidade</th>
+            <th>Mínimo</th>
+            <th>Valor</th>
+            <th>Fornecedor</th>
+            <th>Status</th>
+            <th>Ações</th>
+          </tr>
+        </thead>
+
+        <tbody id="corpoTabela">
+
+        </tbody>
+
+      </table>
+
+    </div>
+
+  </div>
+
+  <script>
+
+    let linhaEditando = null;
+
+    function salvarPeca(){
+
+      const codigo = document.getElementById('codigo').value;
+      const peca = document.getElementById('peca').value;
+      const categoria = document.getElementById('categoria').value;
+      const quantidade = document.getElementById('quantidade').value;
+      const minimo = document.getElementById('minimo').value;
+      const valor = document.getElementById('valor').value;
+      const fornecedor = document.getElementById('fornecedor').value;
+
+      if(codigo === '' || peca === ''){
+        alert('Preencha código e peça!');
+        return;
+      }
+
+      const status = Number(quantidade) <= Number(minimo)
+        ? '<span class="estoque-baixo">ESTOQUE BAIXO</span>'
+        : 'OK';
+
+      if(linhaEditando){
+
+        linhaEditando.cells[0].innerHTML = codigo;
+        linhaEditando.cells[1].innerHTML = peca;
+        linhaEditando.cells[2].innerHTML = categoria;
+        linhaEditando.cells[3].innerHTML = quantidade;
+        linhaEditando.cells[4].innerHTML = minimo;
+        linhaEditando.cells[5].innerHTML = 'R$ ' + valor;
+        linhaEditando.cells[6].innerHTML = fornecedor;
+        linhaEditando.cells[7].innerHTML = status;
+
+        linhaEditando = null;
+
+      } else {
+
+        const tabela = document.getElementById('corpoTabela');
+
+        const linha = tabela.insertRow();
+
+        linha.insertCell(0).innerHTML = codigo;
+        linha.insertCell(1).innerHTML = peca;
+        linha.insertCell(2).innerHTML = categoria;
+        linha.insertCell(3).innerHTML = quantidade;
+        linha.insertCell(4).innerHTML = minimo;
+        linha.insertCell(5).innerHTML = 'R$ ' + valor;
+        linha.insertCell(6).innerHTML = fornecedor;
+        linha.insertCell(7).innerHTML = status;
+
+        linha.insertCell(8).innerHTML = `
+          <button class="btn-editar" onclick="editarLinha(this)">
+            Editar
+          </button>
+
+          <button class="btn-excluir" onclick="excluirLinha(this)">
+            Excluir
+          </button>
+        `;
+
+      }
+
+      limparCampos();
+
+    }
+
+    function limparCampos(){
+
+      document.getElementById('codigo').value = '';
+      document.getElementById('peca').value = '';
+      document.getElementById('categoria').value = '';
+      document.getElementById('quantidade').value = '';
+      document.getElementById('minimo').value = '';
+      document.getElementById('valor').value = '';
+      document.getElementById('fornecedor').value = '';
+
+    }
+
+    function excluirLinha(botao){
+
+      if(confirm('Deseja excluir esta peça?')){
+
+        const linha = botao.parentNode.parentNode;
+        linha.remove();
+
+      }
+
+    }
+
+    function editarLinha(botao){
+
+      linhaEditando = botao.parentNode.parentNode;
+
+      document.getElementById('codigo').value = linhaEditando.cells[0].innerHTML;
+      document.getElementById('peca').value = linhaEditando.cells[1].innerHTML;
+      document.getElementById('categoria').value = linhaEditando.cells[2].innerHTML;
+      document.getElementById('quantidade').value = linhaEditando.cells[3].innerHTML;
+      document.getElementById('minimo').value = linhaEditando.cells[4].innerHTML;
+
+      document.getElementById('valor').value = linhaEditando.cells[5].innerHTML.replace('R$ ','');
+
+      document.getElementById('fornecedor').value = linhaEditando.cells[6].innerHTML;
+
+      window.scrollTo({
+        top:0,
+        behavior:'smooth'
+      });
+
+    }
+
+    function pesquisarPeca(){
+
+      const filtro = document.getElementById('pesquisa').value.toUpperCase();
+
+      const tabela = document.getElementById('tabelaEstoque');
+
+      const tr = tabela.getElementsByTagName('tr');
+
+      for(let i = 1; i < tr.length; i++){
+
+        const td = tr[i].getElementsByTagName('td')[1];
+
+        if(td){
+
+          const texto = td.textContent || td.innerText;
+
+          tr[i].style.display = texto.toUpperCase().indexOf(filtro) > -1
+            ? ''
+            : 'none';
+
+        }
+
+      }
+
+    }
+
+    function voltarDashboard(){
+      window.location.href = 'dashboard.html';
+    }
+
+  </script>
+
+</body>
+</html>
+```
+
+
+
+```html
+<a href="estoque.html" class="btn">
+  Estoque
+</a>
+```
+
+
